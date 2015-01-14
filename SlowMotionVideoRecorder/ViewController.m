@@ -10,7 +10,7 @@
 #import "SVProgressHUD.h"
 #import "AVCaptureManager.h"
 #import <AssetsLibrary/AssetsLibrary.h>
-
+#import "RBVolumeButtons.h"
 
 @interface ViewController ()
 <AVCaptureManagerDelegate>
@@ -29,6 +29,9 @@
 @property (nonatomic, weak) IBOutlet UISegmentedControl *fpsControl;
 @property (nonatomic, weak) IBOutlet UIButton *recBtn;
 @property (nonatomic, weak) IBOutlet UIImageView *outerImageView;
+
+@property (nonatomic, strong) RBVolumeButtons *buttonStealer;
+
 @end
 
 
@@ -64,6 +67,37 @@
     self.outerImage1 = [UIImage imageNamed:@"outer1"];
     self.outerImage2 = [UIImage imageNamed:@"outer2"];
     self.outerImageView.image = self.outerImage1;
+    
+    
+    __weak __typeof(&*self)weakSelf = self;
+    self.buttonStealer.upBlock = ^{
+        [weakSelf recButtonTapped:nil];
+    };
+    
+    [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationWillResignActiveNotification object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
+        
+        if (self.captureManager.isRecording) {
+            [self recButtonTapped:nil];
+        }
+    }];
+    
+}
+
+- (RBVolumeButtons*)buttonStealer{
+    if (!_buttonStealer) {
+        _buttonStealer = [RBVolumeButtons new];
+    }
+    return _buttonStealer;
+}
+
+- (void)viewWillAppear:(BOOL)animated{
+    [super viewWillAppear:animated];
+    [self.buttonStealer startStealingVolumeButtonEvents];
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+    [super viewWillDisappear:animated];
+    [self.buttonStealer stopStealingVolumeButtonEvents];
 }
 
 - (void)didReceiveMemoryWarning
