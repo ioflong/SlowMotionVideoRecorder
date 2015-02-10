@@ -48,7 +48,7 @@ void volumeListenerCallback (
    const float *volumePointer = inData;
    float volume = *volumePointer;
 
-   
+    NSLog(@"volumeListenerCallback");
    if( volume > [(__bridge RBVolumeButtons*)inClientData launchVolume] )
    {
       [(__bridge RBVolumeButtons*)inClientData volumeUp];
